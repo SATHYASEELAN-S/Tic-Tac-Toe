@@ -1,97 +1,223 @@
-const cellElements = document.querySelectorAll(".cell")
-const board = document.getElementById("board")
-const messageWinning=document.getElementById("messagewinning")
-const messageWinningText= document.querySelector(".winning-message-text")
-const restartGame= document.querySelector("#restartbutton")
-const xClass = 'x'
-const circleClass = "circle"
-let circleTurn=false
-let arr=[]
+const cellElements = document.querySelectorAll(".cell");
+const boardHover = document.querySelector(".board")
+const messageWinning = document.getElementById("messagewinning");
+const messageWinningText = document.querySelector(".winning-message-text");
+const restartGame = document.querySelector("#restartbutton");
+const type = document.getElementById("type")
+const xScore = document.getElementById("player-x")
+const oScore = document.getElementById("player-o")
+const human = "x";
+let level = parseInt(type.value)
+const ai = "O";
+let board = ["", "", "", "", "", "", "", "", "", ""];
+let winner=null
+let x = 0, o = 0
+let circleTurn = false
+let current
 
-startgame()
 
-function startgame(){
-     circleTurn=false
-     arr = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-cellElements.forEach(cell => {
-    cell.classList.remove(xClass)
-    cell.classList.remove(circleClass)
-    cell.removeEventListener('click',handleclick)
-    cell.addEventListener("click", handleclick, { once: true })
+startgame();
+
+type.addEventListener("change", function () {
+    console.log(type.value);
+    level = parseInt(type.value)
+    startgame()
 })
-boardhover()
+
+function startgame() {
+    board = ["", "", "", "", "", "", "", "", "", ""];
+    cellElements.forEach((cell) => {
+        messageWinningText.textContent = "  ";
+        cell.classList.remove(human);
+        cell.classList.remove(ai);
+        cell.removeEventListener("click", handleclick);
+        cell.addEventListener("click", handleclick, { once: true });
+    });
 }
 
-
-restartGame.addEventListener('click',function(){
-    startgame()
-    messageWinning.classList.add("winning-message-show")
-})
+restartGame.addEventListener("click", function () {
+    startgame();
+    messageWinning.classList.add("winning-message-show");
+});
 
 function handleclick(e) {
-    const cell = e.target
-    const currentclass = circleTurn ? circleClass : xClass
-    placeMark(cell, currentclass)
-}
-function placeMark(cell, currentclass) {
-    cell.classList.add(currentclass)
+    const cell = e.target;
 
-    arr[cell.getAttribute('id')]=currentclass
-    const winornot=check()
 
-    if (winornot==1)
-    {
-       messageWinning.classList.remove("winning-message-show")
-        messageWinningText.textContent=`${circleTurn?"O":"X"}'s Wins`
-       console.log("Wins");
-    }
-    else if(winornot==0)
-     {
-      messageWinning.classList.remove("winning-message-show")
-      messageWinningText.textContent=`Match Draw`
-     }
-
-    switchTurns()
-    boardhover()
-}
-
-function switchTurns() {
-    circleTurn = !circleTurn
-}
-
-function boardhover() {
-    board.classList.remove("x")
-    board.classList.remove("circle")
-    if (circleTurn) {
-        board.classList.add("circle")
+    if (type.value != "human") {
+        placeMark(cell, human)
+        if (checkwinner()) {
+            message()
+        } else {
+            let move = bestmove()
+            let aiCell = document.getElementById(move)
+            placeMark(aiCell, ai)
+            if (checkwinner()) {
+                message()
+            }
+            console.log(board);
+        }
     }
     else {
-        board.classList.add("x")
+
+       
+        current = circleTurn ? ai : human
+        console.log(current,"cureent ");
+        
+        placeMark(cell, current)
+        w = checkwinner();
+        console.log("win", w);
+
+
+        if (w) {
+            message()
+            console.log("true");
+
+        }
+
+        switchTurn()
+        boardhover()
+
+    }
+}
+function switchTurn() {
+    circleTurn = !circleTurn
+}
+function boardhover() {
+    boardHover.classList.remove(human)
+    boardHover.classList.remove(ai)
+    let hoverClass = circleTurn ? ai : human
+    boardHover.classList.add(hoverClass)
+}
+
+function message() {
+    if (winner == null) {
+        messageWinningText.textContent = "Match Draw";
+    } else {
+    
+        cellElements.forEach((cell) => {
+        cell.removeEventListener("click", handleclick);  
+        })
+        messageWinningText.textContent = winner + "'s Won";
+        if (winner == 'x') {
+            x++
+            xScore.textContent = `Your Score ${x}`
+            console.log(x);
+        } else if (winner == 'O') {
+            o++
+            oScore.textContent = `O' Score ${o}`
+            console.log(o);
+        }
     }
 }
 
-function check() {
-    if (arr[1] == arr[2] && arr[2] === arr[3])
-        return 1
-    else if (arr[4] == arr[5] && arr[5] === arr[6])
-        return 1
-    else if (arr[7] == arr[8] && arr[8] === arr[9]) 
-        return 1
-    else if (arr[1] == arr[4] && arr[4] === arr[7])
-        return 1
-    else if (arr[2] == arr[5] && arr[5] === arr[8]) 
-        return 1
-    else if (arr[3] == arr[6] && arr[6] === arr[9]) 
-        return 1    
-    else if (arr[1] == arr[5] && arr[5] === arr[9]) 
-        return 1
-    else if (arr[7] == arr[5] && arr[5] === arr[3]) 
-        return 1
-    else if (arr[1] != 1 && arr[2] != 2 && arr[3] != 3
-        && arr[4] != 4 && arr[5] != 5 &&
-        arr[6] != 6 && arr[7] != 7 && arr[8] != 8 && arr[9] != 9)
-        return 0
+
+function bestmove() {
+    let move;
+    let bestscore = -Infinity;
+
+    for (let i = 1; i < 10; i++) {
+        if (board[i] == "") {
+            board[i] = ai;
+            let score = minimax(board, 0, false);
+            board[i] = "";
+            if (score > bestscore) {
+                bestscore = score;
+                move = i;
+            }
+        }
+    }
+    board[move] = ai;
+    return move;
 }
 
+let scores = [
+    {
+        x: 0,
+        O: 0,
+        draw: 1,
+    }, {
 
+        x: -1,
+        O: 1,
+        draw: 0,
+    }]
 
+function minimax(board, depth, isMaximizing) {
+    let result = checkwinner();
+    if (result !== null) {
+        return scores[level][result];
+    }
+    if (isMaximizing) {
+        let bestscore = -Infinity;
+        for (let i = 1; i < 10; i++) {
+            if (board[i] == "") {
+                board[i] = ai;
+                let score = minimax(board, depth + 1, false);
+                board[i] = "";
+                if (score > bestscore) {
+                    bestscore = score;
+                }
+            }
+        }
+        return bestscore;
+    } else {
+        let bestscore = Infinity;
+        for (let i = 1; i < 10; i++) {
+            if (board[i] == "") {
+                board[i] = human;
+                let score = minimax(board, depth + 1, true);
+                board[i] = "";
+                if (score < bestscore) {
+                    bestscore = score;
+                }
+            }
+        }
+        return bestscore;
+    }
+}
+
+function placeMark(cell, placedMark) {
+    const index=cell.getAttribute("id")
+    cell.classList.add(placedMark);
+    board[index] = placedMark;
+    cell.removeEventListener("click", handleclick);    
+}
+
+function equal(a, b, c) {
+    return a == b && b == c && a != "";
+}
+
+function checkwinner() {
+    let currentclass = null;
+    if (equal(board[1], board[2], board[3])) 
+        currentclass = board[1];
+    else if (equal(board[4], board[5], board[6])) 
+        currentclass = board[4];
+    else if (equal(board[7], board[8], board[9])) 
+        currentclass = board[7];
+    else if (equal(board[1], board[4], board[7])) 
+        currentclass = board[4];
+    else if (equal(board[2], board[5], board[8])) 
+        currentclass = board[2];
+    else if (equal(board[3], board[6], board[9]))
+         currentclass = board[9];
+    else if (equal(board[1], board[5], board[9])) 
+        currentclass = board[9];
+    else if (equal(board[3], board[5], board[7])) 
+        currentclass = board[7];
+    else if (
+        board[1] != "" &&
+        board[2] != "" &&
+        board[3] != "" &&
+        board[4] != "" &&
+        board[5] != "" &&
+        board[6] != "" &&
+        board[7] != "" &&
+        board[8] != "" &&
+        board[9] != ""
+    )
+        return "Draw";
+    winner =currentclass
+    return winner;
+}
