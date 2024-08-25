@@ -11,6 +11,23 @@
  
 
         <div class="board x" id="board">
+           
+            <div class="content-text">
+                <div class="option">
+                    <select name="" id="type">
+                        <option value="0">Easy</option>
+                        <option value="1">Insane</option>
+                        <option value="human">human</option>
+                    </select>
+                </div>
+                <div class="text">
+                    <h2 class="player-1 " id="player-x">Your Score 0</h2>
+                    <h2 class="player-2"  id="player-o">O's Score 0</h2>
+                </div>
+            </div>
+            
+            <div class="content">
+
             <div class="cell" id="1"></div>
             <div class="cell" id="2"></div>
             <div class="cell" id="3"></div>
@@ -21,10 +38,15 @@
             <div class="cell" id="8"></div>
             <div class="cell" id="9"></div>
         </div>
-        <div class="winning-message winning-message-show" id="messagewinning">
-            <div class="winning-message-text">X' wins</div>
-            <button id="restartbutton">RESTART</button>
+           
+        <div class="winning-message" id="messagewinning">
+    
+                <h2 class="winning-message-text"></h2>
+        
+            <button id="restartbutton">Restart Game</button>
         </div>
+        </div>
+       
     
 
 
