@@ -25,6 +25,8 @@ type.addEventListener("change", function () {
 })
 
 function startgame() {
+    x = 0, o = 0
+    scoreUpdate()
     board = ["", "", "", "", "", "", "", "", "", ""];
     cellElements.forEach((cell) => {
         messageWinningText.textContent = "  ";
@@ -101,14 +103,21 @@ function message() {
         messageWinningText.textContent = winner + "'s Won";
         if (winner == 'x') {
             x++
-            xScore.textContent = `Your Score ${x}`
+           
             console.log(x);
         } else if (winner == 'O') {
             o++
-            oScore.textContent = `O' Score ${o}`
+           
             console.log(o);
         }
+        scoreUpdate()
     }
+}
+
+function scoreUpdate()
+{
+ xScore.textContent = `Your Score ${x}`
+ oScore.textContent = `O' Score ${o}`
 }
 
 
