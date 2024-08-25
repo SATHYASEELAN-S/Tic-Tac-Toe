@@ -21,11 +21,12 @@ startgame();
 type.addEventListener("change", function () {
     console.log(type.value);
     level = parseInt(type.value)
+    x = 0, o = 0
     startgame()
 })
 
 function startgame() {
-    x = 0, o = 0
+ 
     scoreUpdate()
     board = ["", "", "", "", "", "", "", "", "", ""];
     cellElements.forEach((cell) => {
